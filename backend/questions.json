@@ -1,0 +1,102 @@
+[
+  {
+    "question": "He usually ___ to work by car.",
+    "options": ["go", "goes", "going", "gone"],
+    "answer": "goes"
+  },
+  {
+    "question": "I ___ an interesting book right now.",
+    "options": ["read", "am reading", "reads", "reading"],
+    "answer": "am reading"
+  },
+  {
+    "question": "She has ___ umbrella in her bag.",
+    "options": ["a", "the", "an", "some"],
+    "answer": "an"
+  },
+  {
+    "question": "We ___ not play video games during class.",
+    "options": ["does", "do", "are", "did"],
+    "answer": "do"
+  },
+  {
+    "question": "They ___ having lunch at the moment.",
+    "options": ["is", "are", "do", "does"],
+    "answer": "are"
+  },
+  {
+    "question": "My brother ___ in a bank.",
+    "options": ["works", "work", "working", "is work"],
+    "answer": "works"
+  },
+  {
+    "question": "I saw ___ movie you recommended.",
+    "options": ["a", "the", "an", "some"],
+    "answer": "the"
+  },
+  {
+    "question": "What ___ you doing?",
+    "options": ["is", "are", "do", "does"],
+    "answer": "are"
+  },
+  {
+    "question": "There is ___ apple on the table.",
+    "options": ["a", "an", "the", "some"],
+    "answer": "an"
+  },
+  {
+    "question": "She ___ not like coffee.",
+    "options": ["do", "does", "is", "has"],
+    "answer": "does"
+  },
+  {
+    "question": "We ___ TV every evening.",
+    "options": ["are watching", "watch", "watched", "watches"],
+    "answer": "watch"
+  },
+  {
+    "question": "He ___ to music right now.",
+    "options": ["listen", "listens", "is listening", "listening"],
+    "answer": "is listening"
+  },
+  {
+    "question": "I need ___ pen and a notebook.",
+    "options": ["an", "a", "the", "some"],
+    "answer": "a"
+  },
+  {
+    "question": "___ you want some water?",
+    "options": ["Is", "Do", "Are", "Does"],
+    "answer": "Do"
+  },
+  {
+    "question": "Look! The cat ___ on the table.",
+    "options": ["sit", "is sitting", "sitting", "sits"],
+    "answer": "is sitting"
+  },
+  {
+    "question": "She ___ the guitar very well.",
+    "options": ["is playing", "plays", "play", "playing"],
+    "answer": "plays"
+  },
+  {
+    "question": "___ elephant is a large animal.",
+    "options": ["A", "An", "The", "Some"],
+    "answer": "An"
+  },
+  {
+    "question": "We ___ dinner right now, call you later!",
+    "options": ["eat", "are eating", "eating", "eats"],
+    "answer": "are eating"
+  },
+  {
+    "question": "___ teacher is very friendly.",
+    "options": ["A", "An", "The", "Some"],
+    "answer": "The"
+  },
+  {
+    "question": "They ___ basketball on Sundays.",
+    "options": ["are playing", "plays", "play", "playing"],
+    "answer": "play"
+  }
+]
