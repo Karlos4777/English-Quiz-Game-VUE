@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>English Quiz Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/vue@3"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        html {
+            background-color: #f0f4f8;
+            color: #000;
+        }
+
+        html.dark-mode {
+            background-color: #121212;
+            color: #f0f0f0;
+        }
+
+        body {
+            background: transparent;
+        }
+
+        .quiz-box,
+        .start-box,
+        .result-box {
+            background-color: var(--quiz-bg, white);
+            color: var(--quiz-color, black);
+            border-radius: 1em;
+            padding: 2em;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            max-width: 650px;
+            margin: 4em auto;
+            transition: all 0.3s ease;
+        }
+
+        .btn-toggle-mode {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            font-size: 1.4rem;
+            border-radius: 50%;
+            padding: 0.6em 0.9em;
+        }
+
+        .btn-lg {
+            padding: 1rem;
+            font-size: 1.1rem;
+            border-radius: 0.7em;
+        }
+
+        .progress-container {
+            position: relative;
+            height: 25px;
+            background-color: #e0e0e0;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar-custom {
+            height: 100%;
+            transition: width 0.4s ease;
+        }
+
+        html.dark-mode .progress-container {
+            background-color: #333;
+        }
+
+        .animation-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            background-color: rgba(0, 0, 0, 0.8);
+            animation: fadeOut 3s forwards;
+        }
+
+        .animation-text {
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 1em;
+            border-radius: 1em;
+            animation: pop 1.2s ease-in-out infinite alternate;
+        }
+
+        .correct { background-color: #28a745; color: white; }
+        .incorrect { background-color: #dc3545; color: white; }
+
+        .highlight-correct {
+            background-color: #ffc107 !important;
+            color: #000 !important;
+            border-color: #ffc107 !important;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        .feedback {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 1em;
+        }
+
+        .feedback.success {
+            color: #4caf50;
+        }
+
+        .feedback.error {
+            color: #f44336;
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+        }
+
+        .result-box.dark {
+            background: linear-gradient(135deg, #1c1c1c, #3a3a3a);
+        }
+
+        .start-box {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            text-align: center;
+        }
+
+        .start-box.dark {
+            background: linear-gradient(135deg, #1c1c1c, #3a3a3a);
+            color: white;
+        }
+
+        .owl-img {
+            display: block;
+            margin: 0 auto 1em auto;
+            max-height: 160px;
+        }
+
+        @media (max-width: 576px) {
+            .quiz-box, .start-box, .result-box {
+                padding: 1.2em;
+                margin: 1em;
+            }
+
+            .animation-text {
+                font-size: 2rem;
+            }
+
+            .owl-img {
+                max-height: 120px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .quiz-box {
+                max-width: 420px;
+            }
+        }
+    </style>
+</head>
+<body>
+<main id="app">
+    <button class="btn btn-secondary btn-toggle-mode" @click="toggleMode">
+        {{ isDarkMode ? '☀️' : '🌙' }}
+    </button>
+
+    <!-- Pantalla de inicio -->
+    <section class="start-box" :class="{ dark: isDarkMode }" v-if="showStart">
+        <img src="img/owl_sad.png" alt="Sad Owl" class="owl-img">
+        <h1>Welcome to the Quiz!</h1>
+        <p class="lead">Test your knowledge with fun questions</p>
+        <button class="btn btn-light btn-lg mt-4" @click="startQuiz">Start Quiz</button>
+    </section>
+
+    <!-- Animación -->
+    <div v-if="showAnimation" class="animation-overlay">
+        <div class="animation-text" :class="animationClass">{{ animationMessage }}</div>
+    </div>
+
+    <!-- Preguntas -->
+    <section class="quiz-box" :style="boxStyle" v-if="!quizFinished && !showStart && currentQuestion">
+        <img :src="owlImage" alt="Owl" class="owl-img">
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <strong>Question {{ currentIndex + 1 }} / {{ questions.length }}</strong>
+                <strong>Score: {{ score }}</strong>
+            </div>
+            <div class="d-flex justify-content-between mt-2 mb-1">
+                <small>⏱️ Time left: {{ timeLeft }}s</small>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar-custom" :style="{ width: ((currentIndex / questions.length) * 100) + '%', backgroundColor: progressColor }"></div>
+            </div>
+        </div>
+
+        <h5 class="mb-4">{{ currentQuestion.question }}</h5>
+
+        <div class="d-grid gap-2">
+            <button
+                    v-for="option in currentQuestion.options"
+                    :key="option"
+                    class="btn btn-outline-primary btn-lg text-start"
+                    :class="{
+          'active bg-primary text-white': userAnswer === option,
+          'btn-outline-light': isDarkMode,
+          'highlight-correct': feedbackMessage && option === currentQuestion.answer && userAnswer !== currentQuestion.answer
+        }"
+                    @click="selectOption(option)"
+                    :disabled="feedbackMessage">
+                {{ option }}
+            </button>
+        </div>
+
+        <div v-if="feedbackMessage" :class="['feedback', feedbackClass]">
+            {{ feedbackMessage }}
+        </div>
+
+        <button class="btn btn-primary mt-4 w-100" @click="submitAnswer" :disabled="!userAnswer || feedbackMessage">
+            Submit
+        </button>
+    </section>
+
+    <!-- Resultados -->
+    <section class="quiz-box result-box text-center" :class="{ dark: isDarkMode }" v-if="quizFinished">
+        <img :src="finalOwlImage" alt="Owl Result" class="owl-img">
+        <h2 class="mb-4">🎉 Quiz Completed! 🎉</h2>
+        <p class="fs-4">You answered <strong>{{ score }}</strong> out of <strong>{{ questions.length }}</strong> questions correctly.</p>
+        <p class="lead">Your final score is <span class="fw-bold">{{ ((score / questions.length) * 100).toFixed(0) }}%</span></p>
+        <button class="btn btn-light btn-lg mt-4" @click="restartQuiz">Try Again</button>
+    </section>
+</main>
+
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                questions: [],
+                currentIndex: 0,
+                userAnswer: null,
+                score: 0,
+                quizFinished: false,
+                feedbackMessage: null,
+                feedbackClass: "",
+                isDarkMode: false,
+                showAnimation: false,
+                animationMessage: '',
+                animationClass: '',
+                timeLeft: 15,
+                timer: null,
+                progressColor: '#0072ff',
+                showStart: true
+            };
+        },
+        computed: {
+            currentQuestion() {
+                return this.questions[this.currentIndex] || null;
+            },
+            boxStyle() {
+                return this.isDarkMode ? { backgroundColor: '#1e1e1e', color: '#f0f0f0' } : {};
+            },
+            owlImage() {
+                if (this.feedbackMessage) {
+                    return this.feedbackClass === "success" ? "img/owl_happy.png" : "img/owl_sad.png";
+                } else {
+                    return "img/owl_normal.png";
+                }
+            },
+            finalOwlImage() {
+                const scorePercent = (this.score / this.questions.length) * 100;
+                if (scorePercent > 80) return "img/owl_happy.png";
+                if (scorePercent >= 30) return "img/owl_normal.png";
+                return "img/owl_sad.png";
+            }
+        },
+        methods: {
+            async fetchQuestions() {
+                try {
+                    const res = await fetch("questions.json");
+                    this.questions = await res.json();
+                } catch (error) {
+                    console.error("Error loading questions:", error);
+                }
+            },
+            selectOption(option) {
+                this.userAnswer = option;
+            },
+            startTimer() {
+                clearInterval(this.timer);
+                this.timeLeft = 15;
+                this.timer = setInterval(() => {
+                    if (this.timeLeft > 0) {
+                        this.timeLeft--;
+                    } else {
+                        clearInterval(this.timer);
+                        if (!this.feedbackMessage) {
+                            this.userAnswer = null;
+                            this.submitAnswer(true);
+                        }
+                    }
+                }, 1000);
+            },
+            submitAnswer(auto = false) {
+                const correctAnswer = this.currentQuestion.answer;
+                const isCorrect = this.userAnswer === correctAnswer;
+                this.feedbackMessage = isCorrect
+                    ? "✅ Correct! Well done."
+                    : `❌ Incorrect! The correct answer was: ${correctAnswer}`;
+                this.feedbackClass = isCorrect ? "success" : "error";
+                if (isCorrect) this.score++;
+                this.progressColor = isCorrect ? "#28a745" : "#dc3545";
+
+                clearInterval(this.timer);
+                this.showAnimation = true;
+                this.animationMessage = isCorrect ? "✨ Great job! ✨" : "⚠️ Try again! ⚠️";
+                this.animationClass = isCorrect ? "correct" : "incorrect";
+
+                setTimeout(() => {
+                    this.showAnimation = false;
+                    this.userAnswer = null;
+                    this.feedbackMessage = null;
+                    this.feedbackClass = '';
+                    this.animationMessage = '';
+                    this.animationClass = '';
+                    this.progressColor = '#0072ff';
+                    this.currentIndex++;
+                    if (this.currentIndex >= this.questions.length) {
+                        this.quizFinished = true;
+                        clearInterval(this.timer);
+                    } else {
+                        this.startTimer();
+                    }
+                }, 3000);
+            },
+            restartQuiz() {
+                this.currentIndex = 0;
+                this.userAnswer = null;
+                this.score = 0;
+                this.quizFinished = false;
+                this.feedbackMessage = null;
+                this.feedbackClass = '';
+                this.progressColor = '#0072ff';
+                this.startTimer();
+            },
+            startQuiz() {
+                this.showStart = false;
+                this.startTimer();
+            },
+            toggleMode() {
+                this.isDarkMode = !this.isDarkMode;
+                document.documentElement.classList.toggle("dark-mode", this.isDarkMode);
+            }
+        },
+        mounted() {
+            this.fetchQuestions();
+            document.documentElement.classList.toggle("dark-mode", this.isDarkMode);
+        }
+    }).mount("#app");
+</script>
+</body>
+</html>
